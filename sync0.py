@@ -34,21 +34,23 @@ def add_task(user_id, content):
     result = engine.execute(tasks.insert().values(user_id=user_id,
                                                   content=content,
                                                   seq_no=seq_no))
-    return result.inserted_primary_key[0]
+    return result.inserted_primary_key[0], seq_no
 
 
 def edit_task(user_id, task_id, content):
     seq_no = next_seq_no(user_id)
     engine.execute(tasks.update()
-                   .where(tasks.c.user_id == user_id, tasks.c.id == task_id)
+                   .where((tasks.c.user_id == user_id) & (tasks.c.id == task_id))
                    .values(content=content, seq_no=seq_no))
+    return seq_no
 
 
 def delete_task(user_id, task_id):
     seq_no = next_seq_no(user_id)
     engine.execute(tasks.update()
-                   .where(tasks.c.user_id == user_id, tasks.c.id == task_id)
+                   .where((tasks.c.user_id == user_id) & (tasks.c.id == task_id))
                    .values(deleted=True, seq_no=seq_no))
+    return seq_no
 
 
 def all_tasks(user_id):
